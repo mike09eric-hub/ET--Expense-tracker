@@ -18,6 +18,8 @@
 .addamount{font-weight:750;letter-spacing:.1px}
 @media(max-width:600px){.accountbar small{display:none}.top{gap:8px}.actions{gap:6px}.actions .btn{padding:10px 11px;font-size:13px}}
 
+.motivation-card{background:linear-gradient(120deg,#f0eaff,#fff);border-color:#e7def8}.motivation-label{font-size:11px;font-weight:800;letter-spacing:1.2px;color:#7048d8}.motivation-quote{font-size:19px;line-height:1.5;font-weight:750;letter-spacing:-.35px;color:#34244f;margin:12px 0}.motivation-note{font-size:11px;color:#817b90}
+body[data-theme="dark"] .motivation-card{background:linear-gradient(120deg,#302449,#211a30);border-color:#403550}body[data-theme="dark"] .motivation-quote{color:#f0e9ff}body[data-theme="dark"] .motivation-note{color:#aaa1bd}
 /* ET V2 — premium visual layer */
 :root{--bg:#f7f5fc;--panel:#fff;--ink:#211735;--muted:#827b93;--line:#ece7f5;--purple:#7048d8;--pale:#f0eaff;--green:#159b72;--red:#df5b70;--shadow:0 14px 38px #32205d10}
 body{background:radial-gradient(ellipse at 8% 0%,#eee7ff 0,transparent 34%),var(--bg);transition:background .25s,color .25s}
@@ -107,7 +109,7 @@ body[data-theme="dark"] .authswitch button.active{background:#3b2d56;color:#e8dc
 <section id="dashboard" class="page"><div class="heading"><div><h1>Good to see you</h1><p>Here’s your money overview.</p></div><span class="tag" id="monthLabel"></span></div>
 <div class="grid"><div class="card metric"><div class="dot">₦</div><label>Available balance</label><strong id="balance">₦0</strong><small>Income minus expenses</small></div><div class="card metric"><div class="dot">↗</div><label>Total income</label><strong id="income" class="positive">₦0</strong><small>This month</small></div><div class="card metric"><div class="dot">↘</div><label>Total expenses</label><strong id="expense" class="negative">₦0</strong><small>This month</small></div><div class="card metric"><div class="dot">◈</div><label>Net savings</label><strong id="saving">₦0</strong><small>This month</small></div></div>
 <div class="columns"><div class="card"><h3>Monthly cash flow</h3><div id="cashflow" class="empty">Add a transaction to see your cash flow.</div></div><div class="card"><h3>Spending by category</h3><div id="categories" class="empty">Your spending categories will appear here.</div></div></div>
-<div class="card" style="margin-top:15px"><h3>Money insight</h3><p id="moneyInsight" class="subtle">Your personal spending insight will appear here.</p></div><div class="card" style="margin-top:15px"><div class="rowend"><h3 style="margin:0">Recent transactions</h3><button class="btn secondary" data-goto="transactions">View all</button></div><div id="recent"></div></div>
+<div class="card motivation-card" style="margin-top:15px"><div class="motivation-label">✦ A LITTLE MOTIVATION</div><p id="motivationQuote" class="motivation-quote" aria-live="polite">Small steps every day create remarkable progress.</p><div class="motivation-note">A fresh thought for your journey · Changes every minute</div></div><div class="card" style="margin-top:15px"><h3>Money insight</h3><p id="moneyInsight" class="subtle">Your personal spending insight will appear here.</p></div><div class="card" style="margin-top:15px"><div class="rowend"><h3 style="margin:0">Recent transactions</h3><button class="btn secondary" data-goto="transactions">View all</button></div><div id="recent"></div></div>
 <div class="notice" id="cloudNotice">Your account is connected. Your records are securely saved to your private cloud account and are available when you log in on another device.</div></section>
 <section id="transactions" class="page hidden"><div class="heading"><div><h1>Transactions</h1><p>Search and manage your income and expenses.</p></div><button class="btn addamount" id="addBtn2">＋ Add Amount</button></div><div class="filter"><input id="search" placeholder="Search description…"><select id="typeFilter"><option value="">All types</option><option value="income">Income</option><option value="expense">Expense</option></select><select id="categoryFilter"><option value="">All categories</option></select><input id="dateFrom" type="date" aria-label="From date"><input id="dateTo" type="date" aria-label="To date"></div><div class="card" id="allTransactions"></div></section>
 <section id="budgets" class="page hidden"><div class="heading"><div><h1>Budgets</h1><p>Set monthly spending limits by category.</p></div><button class="btn" id="budgetBtn">＋ Set budget</button></div><div class="card" id="budgetList"><div class="empty">No budgets yet. Set a limit to start tracking.</div></div></section>
@@ -126,6 +128,48 @@ const themeToggle=$('themeToggle');
 function setTheme(mode){document.body.dataset.theme=mode;localStorage.setItem('et_theme',mode);if(themeToggle)themeToggle.textContent=mode==='dark'?'☀ Light':'☾ Dark'}
 setTheme(localStorage.getItem('et_theme')||'light');
 if(themeToggle)themeToggle.onclick=()=>setTheme(document.body.dataset.theme==='dark'?'light':'dark');
+
+const motivationQuotes=[
+"Small steps every day create remarkable progress.",
+"Your future self will thank you for the choices you make today.",
+"Consistency beats intensity when you keep showing up.",
+"Every naira you manage wisely is a step toward your goals.",
+"Progress is progress, even when it feels slow.",
+"Build habits that support the life you want.",
+"Don't compare your chapter one to someone else's chapter twenty.",
+"Discipline today creates more choices tomorrow.",
+"You do not need to be perfect; you need to keep going.",
+"Every transaction you track is a little more control over your money.",
+"Big goals become manageable when you take them one step at a time.",
+"Stay patient with the process and committed to the plan.",
+"Your decisions today are shaping your opportunities tomorrow.",
+"Keep learning, keep improving, and keep moving forward.",
+"A setback is a moment, not the whole story.",
+"Spend with intention and save with purpose.",
+"Make your money serve your goals, not the other way around.",
+"Little by little, a little becomes a lot.",
+"Focus on what you can control and take the next step.",
+"Your effort matters, even when nobody else sees it.",
+"Be proud of the progress you are making.",
+"Choose steady progress over quick shortcuts.",
+"Every day is another chance to make a better decision.",
+"Stay curious, stay disciplined, and trust your growth.",
+"Financial confidence grows one good habit at a time.",
+"Keep your goals in sight and your next step simple.",
+"You are allowed to start small and still dream big.",
+"Turn today's lessons into tomorrow's strength.",
+"Success is built through the things you do consistently.",
+"Keep going; the work you put in today is not wasted."
+];
+let lastMotivationIndex=-1;
+function showMotivationQuote(){
+ const el=$('motivationQuote');if(!el)return;
+ let next=Math.floor(Math.random()*motivationQuotes.length);
+ if(motivationQuotes.length>1&&next===lastMotivationIndex)next=(next+1)%motivationQuotes.length;
+ lastMotivationIndex=next;el.textContent='“'+motivationQuotes[next]+'”';
+}
+showMotivationQuote();
+setInterval(showMotivationQuote,60000);
 
 const CATS={income:['Salary','Business income','Trading profits','Gifts','Allowance','Other'],expense:['Food','Transport','Education','Rent','Bills & utilities','Shopping','Healthcare','Entertainment','Subscriptions','Business','Other']};
 const KEY='et_tracker_v1';let data=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"budgets":[],"goals":[]}');data.recurring??=[];
