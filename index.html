@@ -309,7 +309,8 @@ async function handleSignedIn(user){
    if(assigned){await syncWalletCloud();await syncCloud()}
    localStorage.setItem(KEY,JSON.stringify(data));
   }
-  if(data.wallets.some(w=>w.name==='Main wallet'&&walletRows.data.some(x=>x.id===w.id&&x.name==='Cash'))){await syncWalletCloud()}\n  await processDueRecurring();render();$('cloudNotice').textContent='Cloud sync is on. Your records are saved privately to your account.';
+  if(data.wallets.some(w=>w.name==='Main wallet'&&walletRows.data.some(x=>x.id===w.id&&x.name==='Cash'))){await syncWalletCloud()}
+  await processDueRecurring();render();$('cloudNotice').textContent='Cloud sync is on. Your records are saved privately to your account.';
   if(localStorage.getItem('et_pin_hash'))showPinLock();
  }catch(err){$('cloudNotice').textContent='Could not load cloud records: '+(err.message||'Please refresh and try again.');$('cloudNotice').style.background='#fff0f0';$('cloudNotice').style.color='#a33'}
 }
