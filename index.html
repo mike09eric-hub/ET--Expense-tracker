@@ -193,6 +193,17 @@ body[data-theme="dark"] .list .tag.expense-tag{background:#47232e;color:#ff9dad}
 #analyticsMonth{padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);max-width:170px}
 #analytics .grid{gap:10px}#analytics .metric{min-height:120px}#analytics .metric strong{font-size:22px}
 @media(max-width:700px){#analytics .heading{align-items:flex-start;gap:10px;flex-wrap:wrap}#analyticsMonth{width:155px}#analytics .barrow{grid-template-columns:75px 1fr 82px;gap:7px;font-size:11px}}
+
+/* Android app update prompt */
+#etUpdateGate{position:fixed;inset:0;z-index:99999;display:none;place-items:center;padding:20px;background:#100b1dcc;backdrop-filter:blur(8px)}
+#etUpdateGate.show{display:grid}
+#etUpdateGate .et-update-card{width:min(430px,100%);padding:26px;border-radius:24px;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 70px #0005;text-align:center}
+#etUpdateGate .et-update-icon{width:62px;height:62px;margin:0 auto 15px;border-radius:19px;display:grid;place-items:center;background:#f0eaff;color:#7048d8;font-size:29px;font-weight:900}
+#etUpdateGate h2{margin:0 0 9px;font-size:23px}
+#etUpdateGate p{color:var(--muted);line-height:1.6;margin:0 0 18px}
+#etUpdateGate .btn{width:100%;padding:14px}
+#etUpdateGate .et-update-version{display:block;margin-top:13px;color:var(--muted);font-size:11px}
+
 </style>
 </head>
 <body>
@@ -496,4 +507,29 @@ $('budgetBtn').onclick=()=>openModal('Set monthly budget','<div class="formgrid"
 $('goalBtn').onclick=()=>openModal('Create savings goal','<div class="formgrid"><div class="field full"><label>Goal name</label><input id="gName" placeholder="e.g. Emergency fund"></div><div class="field"><label>Target (₦)</label><input id="gTarget" type="number" min="1"></div><div class="field"><label>Already saved (₦)</label><input id="gSaved" type="number" min="0" value="0"></div></div>',()=>{let target=Number($('gTarget').value),name=$('gName').value.trim();if(!name||target<=0)return alert('Enter a goal name and valid target.');data.goals.push({id:crypto.randomUUID(),name,target,saved:Math.max(0,Number($('gSaved').value))});$('modalRoot').innerHTML='';save()});
 function showPage(b){document.querySelectorAll('#nav [data-page]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('#moreNavMenu [data-page]').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.page));$('moreNavMenu').classList.add('hidden');$('moreNavBtn').setAttribute('aria-expanded','false');render()}document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>showPage(b));$('moreNavBtn').onclick=()=>{const open=$('moreNavMenu').classList.toggle('hidden')===false;$('moreNavBtn').setAttribute('aria-expanded',String(open))};document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>document.querySelector('[data-page="'+b.dataset.goto+'"]').click());render();
 if('serviceWorker' in navigator && location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('ET offline setup unavailable:',err)));}
+
+/* ET Android version gate: only native Android app installations are checked. */
+(async function checkETAndroidUpdate(){
+  const isAndroid= /Android/i.test(navigator.userAgent);
+  const isNativeBridge=!!(window.AndroidET && typeof window.AndroidET.getAppVersion==='function');
+  const isLegacyWebView=isAndroid && /;\s*wv\)/i.test(navigator.userAgent);
+  if(!isAndroid || (!isNativeBridge && !isLegacyWebView)) return;
+  let installed='0.0.0';
+  try{ if(isNativeBridge) installed=String(window.AndroidET.getAppVersion()||'0.0.0'); }catch(e){}
+  const parse=v=>String(v||'0').split(/[.+-]/).slice(0,3).map(n=>parseInt(n,10)||0);
+  const compare=(a,b)=>{const x=parse(a),y=parse(b);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]-y[i]}return 0};
+  try{
+    const response=await fetch('/app-update.json?check='+Date.now(),{cache:'no-store'});
+    if(!response.ok)return;
+    const update=await response.json();
+    if(compare(installed,update.minimumVersion||update.latestVersion)<=0)return;
+    const gate=document.createElement('div');
+    gate.id='etUpdateGate';
+    gate.innerHTML='<div class="et-update-card"><div class="et-update-icon">↻</div><h2>Update ET to continue</h2><p>A newer version of ET Expense Tracker is available. Please update the app to get the latest improvements and keep everything working smoothly.</p><button class="btn" id="etUpdateNow">Update now</button><span class="et-update-version">Installed version '+installed+' · Latest version '+String(update.latestVersion||'')+'</span></div>';
+    document.body.appendChild(gate);
+    gate.classList.add('show');
+    document.getElementById('etUpdateNow').onclick=()=>{window.location.href=update.downloadUrl||'https://github.com/mike09eric-hub/ET--Expense-tracker/releases/latest'};
+  }catch(error){console.warn('ET update check unavailable',error)}
+})();
+
 </script></body></html>
