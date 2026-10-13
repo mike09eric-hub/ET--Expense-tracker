@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "ET — Expense Tracker",
+  "short_name": "ET Tracker",
+  "description": "Track your income, expenses, wallets, budgets and savings.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f5fc",
+  "theme_color": "#6d45d8",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "192x192 512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
