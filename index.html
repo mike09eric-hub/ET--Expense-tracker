@@ -170,6 +170,7 @@ function showMotivationQuote(){
  lastMotivationIndex=next;el.textContent='“'+motivationQuotes[next]+'”';
 }
 showMotivationQuote();
+setInterval(showMotivationQuote,60000);
 
 const CATS={income:['Salary','Business income','Trading profits','Gifts','Allowance','Other'],expense:['Food','Transport','Education','Rent','Bills & utilities','Shopping','Healthcare','Entertainment','Subscriptions','Business','Other']};
 const KEY='et_tracker_v1';let data=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"budgets":[],"goals":[]}');data.recurring??=[];
