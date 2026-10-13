@@ -67,6 +67,72 @@ jobs:
           npx cap add android
           npx cap sync android
 
+          # Add native Android Downloads support for CSV exports from the hosted WebView.
+          APP_DIR="android/app/src/main/java/com/mikeeric/ettracker"
+          mkdir -p "$APP_DIR"
+          cat > "$APP_DIR/MainActivity.java" <<'EOF'
+          package com.mikeeric.ettracker;
+
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebView webView = getBridge().getWebView();
+                  webView.addJavascriptInterface(new ETFileBridge(this), "AndroidET");
+              }
+          }
+          EOF
+          cat > "$APP_DIR/ETFileBridge.java" <<'EOF'
+          package com.mikeeric.ettracker;
+
+          import android.content.ContentValues;
+          import android.content.Context;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.Environment;
+          import android.provider.MediaStore;
+          import android.util.Base64;
+          import android.webkit.JavascriptInterface;
+          import java.io.OutputStream;
+
+          public class ETFileBridge {
+              private final Context context;
+              public ETFileBridge(Context context) { this.context = context.getApplicationContext(); }
+
+              @JavascriptInterface
+              public boolean saveFile(String base64, String fileName, String mimeType) {
+                  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false;
+                  Uri fileUri = null;
+                  try {
+                      byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                      ContentValues values = new ContentValues();
+                      values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+                      values.put(MediaStore.Downloads.MIME_TYPE, mimeType);
+                      values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/ET Expense Tracker");
+                      values.put(MediaStore.Downloads.IS_PENDING, 1);
+                      fileUri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                      if (fileUri == null) return false;
+                      try (OutputStream output = context.getContentResolver().openOutputStream(fileUri)) {
+                          if (output == null) throw new IllegalStateException("Cannot open Downloads file");
+                          output.write(bytes);
+                          output.flush();
+                      }
+                      ContentValues complete = new ContentValues();
+                      complete.put(MediaStore.Downloads.IS_PENDING, 0);
+                      context.getContentResolver().update(fileUri, complete, null, null);
+                      return true;
+                  } catch (Exception error) {
+                      if (fileUri != null) context.getContentResolver().delete(fileUri, null, null);
+                      return false;
+                  }
+              }
+          }
+          EOF
+
       - name: Build debug APK
         working-directory: et-android/android
         run: |
