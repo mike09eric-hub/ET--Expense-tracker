@@ -118,6 +118,9 @@ body[data-theme="dark"] .authswitch button.active{background:#3b2d56;color:#e8dc
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
+/* DOM helper must be declared before any code uses it. */
+const $=id=>document.getElementById(id);
+
 /* V2 theme preference */
 const themeToggle=$('themeToggle');
 function setTheme(mode){document.body.dataset.theme=mode;localStorage.setItem('et_theme',mode);if(themeToggle)themeToggle.textContent=mode==='dark'?'☀ Light':'☾ Dark'}
@@ -125,7 +128,7 @@ setTheme(localStorage.getItem('et_theme')||'light');
 if(themeToggle)themeToggle.onclick=()=>setTheme(document.body.dataset.theme==='dark'?'light':'dark');
 
 const CATS={income:['Salary','Business income','Trading profits','Gifts','Allowance','Other'],expense:['Food','Transport','Education','Rent','Bills & utilities','Shopping','Healthcare','Entertainment','Subscriptions','Business','Other']};
-const KEY='et_tracker_v1';let data=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"budgets":[],"goals":[]}');data.recurring??=[];const $=id=>document.getElementById(id);
+const KEY='et_tracker_v1';let data=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"budgets":[],"goals":[]}');data.recurring??=[];
 const SUPABASE_URL='https://oddlvoibdpdpkwfxwafa.supabase.co';
 const SUPABASE_KEY='sb_publishable_HdsZYwyc5cd-9c6BL3Vzdw_PlMEjf6W';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
