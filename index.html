@@ -182,10 +182,11 @@ body[data-theme="dark"] .list .tag.expense-tag{background:#47232e;color:#ff9dad}
 
 /* Android system navigation clearance: keep ET controls above the Home/Back bar */
 @media(max-width:700px){
-  :root{--et-system-nav-clearance:max(env(safe-area-inset-bottom,0px),32px)}
+  /* Reserve a fixed Android navigation-bar gap; many 3-button layouts report no safe-area inset. */
+  :root{--et-system-nav-clearance:76px}
   .shell{padding-bottom:calc(100px + var(--et-system-nav-clearance))}
-  .nav{bottom:calc(10px + var(--et-system-nav-clearance))}
-  .more-nav-menu{bottom:calc(82px + var(--et-system-nav-clearance))}
+  .nav{bottom:var(--et-system-nav-clearance)}
+  .more-nav-menu{bottom:calc(72px + var(--et-system-nav-clearance))}
 }
 </style>
 </head>
