@@ -522,7 +522,7 @@ if('serviceWorker' in navigator && location.protocol==='https:'){window.addEvent
     const response=await fetch('/app-update.json?check='+Date.now(),{cache:'no-store'});
     if(!response.ok)return;
     const update=await response.json();
-    if(compare(installed,update.minimumVersion||update.latestVersion)<=0)return;
+    if(compare(installed,update.minimumVersion||update.latestVersion)>=0)return;
     const gate=document.createElement('div');
     gate.id='etUpdateGate';
     gate.innerHTML='<div class="et-update-card"><div class="et-update-icon">↻</div><h2>Update ET to continue</h2><p>A newer version of ET Expense Tracker is available. Please update the app to get the latest improvements and keep everything working smoothly.</p><button class="btn" id="etUpdateNow">Update now</button><span class="et-update-version">Installed version '+installed+' · Latest version '+String(update.latestVersion||'')+'</span></div>';
