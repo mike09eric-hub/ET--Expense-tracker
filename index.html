@@ -273,7 +273,7 @@ const KEY='et_tracker_v1';let data=JSON.parse(localStorage.getItem(KEY)||'{"tran
 const SUPABASE_URL='https://oddlvoibdpdpkwfxwafa.supabase.co';
 const SUPABASE_KEY='sb_publishable_HdsZYwyc5cd-9c6BL3Vzdw_PlMEjf6W';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser=null,authMode='login',syncIds={transactions:[],budgets:[],savings_goals:[],recurring_transactions:[],wallets:[],wallet_transfers:[]},syncBusy=false;
+let currentUser=null,authMode='login',syncIds={transactions:[],budgets:[],savings_goals:[],recurring_transactions:[],wallets:[],wallet_transfers:[]},syncBusy=false,syncAgain=false;
 const authMessage=(message,type='')=>{const el=$('authMessage');el.textContent=message;el.className='authmsg '+type};
 function setAuthMode(mode){authMode=mode;$('loginTab').classList.toggle('active',mode==='login');$('signupTab').classList.toggle('active',mode==='signup');$('authTitle').textContent=mode==='login'?'Welcome back':'Create your ET account';$('authIntro').textContent=mode==='login'?'Log in to securely access your personal expense tracker from any device.':'Create an account to keep your income, expenses, budgets and goals backed up securely.';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authPassword').autocomplete=mode==='login'?'current-password':'new-password';authMessage('')}
 $('loginTab').onclick=()=>setAuthMode('login');$('signupTab').onclick=()=>setAuthMode('signup');
@@ -282,7 +282,30 @@ $('logoutBtn').onclick=async()=>{await supabaseClient.auth.signOut();};
 const money=n=>'₦'+Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});const save=()=>{localStorage.setItem(KEY,JSON.stringify(data));render();if(currentUser)syncWalletCloud().then(syncCloud).catch(err=>{$('cloudNotice').textContent='Cloud sync issue: '+(err.message||'Please check your connection.');$('cloudNotice').style.background='#fff0f0';$('cloudNotice').style.color='#a33'})};
 function rowsToLocal(rows,kind){return rows.map(r=>kind==='transactions'?{id:r.id,type:r.type,amount:Number(r.amount),date:r.date,category:r.category,description:r.description||'',walletId:r.wallet_id||null}:kind==='budgets'?{id:r.id,category:r.category,limit:Number(r.monthly_limit)}:{id:r.id,name:r.name,target:Number(r.target_amount),saved:Number(r.saved_amount)})}
 function localToRows(kind){const localKind=kind==='savings_goals'?'goals':kind;return data[localKind].map(x=>kind==='transactions'?{id:x.id,user_id:currentUser.id,type:x.type,amount:x.amount,date:x.date,category:x.category,description:x.description||'',wallet_id:x.walletId||null}:kind==='budgets'?{id:x.id,user_id:currentUser.id,category:x.category,monthly_limit:x.limit}:{id:x.id,user_id:currentUser.id,name:x.name,target_amount:x.target,saved_amount:x.saved})}
-async function syncCloud(){if(!currentUser||syncBusy)return;syncBusy=true;try{for(const kind of ['transactions','budgets','savings_goals']){const localKind=kind==='savings_goals'?'goals':kind;const items=data[localKind];items.forEach(x=>{if(!x.id)x.id=crypto.randomUUID()});const ids=items.map(x=>x.id);const stale=syncIds[kind].filter(id=>!ids.includes(id));if(stale.length){const {error}=await supabaseClient.from(kind).delete().in('id',stale);if(error)throw error}if(items.length){const {error}=await supabaseClient.from(kind).upsert(localToRows(kind),{onConflict:'id'});if(error)throw error}syncIds[kind]=ids}localStorage.setItem(KEY,JSON.stringify(data));$('cloudNotice').textContent='Cloud sync is on. Your records are saved privately to your account.';$('cloudNotice').style.background='';$('cloudNotice').style.color=''}finally{syncBusy=false}}
+async function syncCloud(){
+ if(!currentUser)return;
+ if(syncBusy){syncAgain=true;return}
+ syncBusy=true;
+ try{
+  for(const kind of ['transactions','budgets','savings_goals']){
+   const localKind=kind==='savings_goals'?'goals':kind;
+   const items=data[localKind];
+   items.forEach(x=>{if(!x.id)x.id=crypto.randomUUID()});
+   const ids=items.map(x=>x.id);
+   const stale=syncIds[kind].filter(id=>!ids.includes(id));
+   if(stale.length){const {error}=await supabaseClient.from(kind).delete().in('id',stale);if(error)throw error}
+   if(items.length){const {error}=await supabaseClient.from(kind).upsert(localToRows(kind),{onConflict:'id'});if(error)throw error}
+   syncIds[kind]=ids;
+  }
+  localStorage.setItem(KEY,JSON.stringify(data));
+  $('cloudNotice').textContent='Cloud sync is on. Your records are saved privately to your account.';
+  $('cloudNotice').style.background='';
+  $('cloudNotice').style.color='';
+ }finally{
+  syncBusy=false;
+  if(syncAgain){syncAgain=false;await syncCloud()}
+ }
+}
 async function handleSignedIn(user){
  if(currentUser?.id===user.id&&!$('appShell').classList.contains('hidden'))return;
  currentUser=user;$('authScreen').classList.add('hidden');$('appShell').classList.remove('hidden');$('userEmail').textContent=user.email||'Signed in';$('cloudNotice').textContent='Loading your private cloud records…';
