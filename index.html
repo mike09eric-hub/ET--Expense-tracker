@@ -87,7 +87,67 @@ body[data-theme="dark"] .authwrap{background:var(--bg)}
 body[data-theme="dark"] .authswitch{background:#292137}
 body[data-theme="dark"] .authswitch button.active{background:#3b2d56;color:#e8dcff}
 
-\n/* Compact navigation: keep the bottom bar focused on the main areas */\n.nav{align-items:center}\n.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.1}\n.nav button span{font-size:10px}\n.more-nav-menu{position:fixed;z-index:11;left:12px;right:12px;bottom:82px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px;background:#241b36f5;border:1px solid #ffffff22;border-radius:16px;box-shadow:0 12px 35px #1a102e40;backdrop-filter:blur(18px)}\n.more-nav-menu button{padding:11px 6px;border-radius:10px;background:#ffffff12;color:#eee8fa;font-size:12px;font-weight:650}\n.more-nav-menu button:active{background:#ffffff28}\n@media(min-width:701px){.nav{position:static;justify-content:flex-start;overflow:visible}.nav button{flex-direction:row;padding:10px 14px}.nav button span{font-size:13px}.more-nav-menu{position:absolute;left:auto;right:26px;bottom:auto;top:145px;width:310px}}\n</style>
+\n/* Compact navigation: keep the bottom bar focused on the main areas */\n.nav{align-items:center}\n.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.1}\n.nav button span{font-size:10px}\n.more-nav-menu{position:fixed;z-index:11;left:12px;right:12px;bottom:82px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px;background:#241b36f5;border:1px solid #ffffff22;border-radius:16px;box-shadow:0 12px 35px #1a102e40;backdrop-filter:blur(18px)}\n.more-nav-menu button{padding:11px 6px;border-radius:10px;background:#ffffff12;color:#eee8fa;font-size:12px;font-weight:650}\n.more-nav-menu button:active{background:#ffffff28}\n@media(min-width:701px){.nav{position:static;justify-content:flex-start;overflow:visible}.nav button{flex-direction:row;padding:10px 14px}.nav button span{font-size:13px}.more-nav-menu{position:absolute;left:auto;right:26px;bottom:auto;top:145px;width:310px}}\n
+/* ET More menu — refined floating feature panel */
+.more-nav-menu{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  padding:15px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#302348f7,#1d172cf7);
+  border:1px solid #ffffff20;
+  box-shadow:0 18px 48px #120b2480, inset 0 1px 0 #ffffff18;
+  max-width:430px;
+  margin-inline:auto;
+}
+.more-nav-menu:before{
+  content:"MORE FEATURES";
+  grid-column:1/-1;
+  display:block;
+  padding:1px 3px 5px;
+  color:#cbb9f5;
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:1.5px;
+}
+.more-nav-menu button{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:9px;
+  padding:12px 13px;
+  text-align:left;
+  border:1px solid #ffffff12;
+  border-radius:13px;
+  background:linear-gradient(135deg,#ffffff13,#ffffff08);
+  color:#f6f1ff;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:inset 0 1px 0 #ffffff0b;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.more-nav-menu button:before{
+  content:"";
+  width:7px;height:7px;flex:0 0 7px;
+  border-radius:3px;
+  background:#a98af4;
+  box-shadow:0 0 0 4px #a98af41c;
+}
+.more-nav-menu button:hover,.more-nav-menu button:focus-visible{
+  outline:none;
+  background:#8058e733;
+  border-color:#a98af466;
+  transform:translateY(-1px);
+}
+@media(max-width:700px){
+  .more-nav-menu{left:14px;right:14px;bottom:82px;width:auto}
+}
+@media(min-width:701px){
+  .more-nav-menu{top:145px;right:26px;left:auto;width:340px}
+}
+
+</style>
 </head>
 <body>
 <section class="authwrap" id="authScreen">
